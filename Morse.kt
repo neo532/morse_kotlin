@@ -4,17 +4,19 @@
  * @date 2019-11-20
  * @mail neo532@126.com
  */
+package *
 interface CodeConverter{
     public fun encrypt(oriChar: String):String
     public fun decrypt(oriChar: String):String
 }
 
-object MorseConverter : CodeConverter{
+class MorseConverter : CodeConverter{
     private val char2morseList:Map<String,String>
     private val morse2charList:Map<String,String>
-    private const val delimiter = "/"
-    private const val di = "•"
-    private const val da = "ㅡ"
+    private var converterPostion:String? = ""
+    private val delimiter:String = "/"
+    private val di:String = "•"
+    private val da:String = "ㅡ"
 
     init{
         //这里顺序不能更改
@@ -23,56 +25,50 @@ object MorseConverter : CodeConverter{
     }
 
     override fun encrypt(oriChar: String):String{
-        return char2morse(oriChar)
+        return word2morse(oriChar)
     }
 
     override fun decrypt(oriChar: String):String{
-        return morse2char(oriChar)
+        return morse2word(oriChar)
     }
 
-    internal fun morse2char(oriMorse: String):String {
-        val morse2charList = this.morse2charList
+    internal fun morse2word(oriMorse: String):String {
         var letterList = oriMorse.split(delimiter)
-
         var word = ""
-        var tmp:String?
-
         for (letter in letterList) {
-            tmp = morse2charList.get(letter.toString())
-            if(tmp==null){
-                word += letter
-            }else{
-                word += tmp.toString()
-            }
+            word += this.morse2letter(letter.toString())
         }
-
         return word
     }
 
-    internal fun char2morse(oriChar: String):String {
-        val char2morseList = this.char2morseList
-
-        var tmp:String?
+    internal fun word2morse(oriChar: String):String {
         var morse = ""
-
         for (letter in oriChar) {
-            tmp = char2morseList.get(letter.toString())
-            if(tmp==null){
-                morse += letter.toString()
-            }else{
-                morse += tmp.toString()
-            }
-            morse += delimiter
+            morse += letter2morse(letter.toString()) + delimiter
         }
         morse = morse.dropLast(1)
-
         return morse
     }
 
+    protected fun morse2letter(morse:String):String{
+        this.converterPostion = this.morse2charList.get(morse)
+        if(this.converterPostion!=null){
+            return this.converterPostion.toString()
+        }
+        return morse
+    }
+
+    protected fun letter2morse(letter:String):String{
+        this.converterPostion = this.char2morseList.get(letter)
+        if(this.converterPostion!=null){
+            return this.converterPostion.toString()
+        }
+        return letter.toString()
+    }
+
     private fun getMorse2charList() :Map<String,String> {
-        val char2morseList = this.char2morseList
         var morse2charList= mapOf<String,String>().toMutableMap()
-        for ((k,v) in char2morseList){
+        for ((k,v) in this.char2morseList){
             morse2charList[v] = k
         }
         return morse2charList
